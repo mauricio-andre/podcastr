@@ -1,5 +1,6 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { format, parseISO } from 'date-fns';
+// import { useRouter } from 'next/router';
 import Image from 'next/image';
 import Link from 'next/link';
 import ptBr from 'date-fns/locale/pt-BR';
@@ -25,6 +26,13 @@ type EpisodeProps = {
 }
 
 export default function Episode({ episode }: EpisodeProps) {
+  // const router = useRouter();
+
+  // if (router.isFallback) {
+  //   // Quando fallback em getStaticPaths é definido como true
+  //   return 'Carregando...';
+  // }
+
   return (
     <div className={styles.episodeWrapper}>
       <div className={styles.episode}>
@@ -62,8 +70,24 @@ export default function Episode({ episode }: EpisodeProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
+  const { data } = await api.get('/episodes', {
+    params: {
+      _limit: 2,
+      _short: 'published_at',
+      _order: 'desc',
+    }
+  });
+
+  const paths = data.map(episode => {
+    return {
+      params: {
+        slug: episode.id,
+      },
+    };
+  });
+
   return {
-    paths: [],
+    paths,
     fallback: 'blocking',
   };
 };
